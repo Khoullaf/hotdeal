@@ -4,17 +4,19 @@ import OfferGrid from '@/components/OfferGrid'
 import type { Metadata } from 'next'
 
 interface PageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const category = await prisma.category.findUnique({ where: { slug: params.slug } })
+  const { slug } = await params
+  const category = await prisma.category.findUnique({ where: { slug } })
   if (!category) return { title: 'Catégorie non trouvée' }
   return { title: `${category.name} | HotDeal`, description: `Meilleures offres ${category.name}` }
 }
 
 export default async function CategoryPage({ params }: PageProps) {
-  const category = await prisma.category.findUnique({ where: { slug: params.slug } })
+  const { slug } = await params
+  const category = await prisma.category.findUnique({ where: { slug } })
   if (!category) notFound()
 
   const offers = await prisma.offer.findMany({

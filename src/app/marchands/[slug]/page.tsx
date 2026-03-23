@@ -4,17 +4,19 @@ import OfferGrid from '@/components/OfferGrid'
 import type { Metadata } from 'next'
 
 interface PageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const merchant = await prisma.merchant.findUnique({ where: { slug: params.slug } })
+  const { slug } = await params
+  const merchant = await prisma.merchant.findUnique({ where: { slug } })
   if (!merchant) return { title: 'Marchand non trouvé' }
   return { title: `${merchant.name} | HotDeal` }
 }
 
 export default async function MerchantPage({ params }: PageProps) {
-  const merchant = await prisma.merchant.findUnique({ where: { slug: params.slug } })
+  const { slug } = await params
+  const merchant = await prisma.merchant.findUnique({ where: { slug } })
   if (!merchant) notFound()
 
   const offers = await prisma.offer.findMany({

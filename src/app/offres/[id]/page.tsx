@@ -8,12 +8,13 @@ import OfferGrid from '@/components/OfferGrid'
 import type { Metadata } from 'next'
 
 interface PageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params
   const offer = await prisma.offer.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { merchant: true }
   })
   if (!offer) return { title: 'Offre non trouvée' }
@@ -24,8 +25,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function OfferDetailPage({ params }: PageProps) {
+  const { id } = await params
   const offer = await prisma.offer.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { merchant: true, category: true },
   })
 

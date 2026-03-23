@@ -3,24 +3,25 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const body = await request.json().catch(() => ({}))
   const sessionId = body.sessionId || null
   const userAgent = request.headers.get('user-agent') || null
 
-  const offer = await prisma.offer.findUnique({ where: { id: params.id }, select: { id: true } })
+  const offer = await prisma.offer.findUnique({ where: { id }, select: { id: true } })
   if (!offer) {
     return NextResponse.json({ error: 'Offer not found' }, { status: 404 })
   }
 
   await Promise.all([
     prisma.offer.update({
-      where: { id: params.id },
+      where: { id },
       data: { clicks: { increment: 1 } },
     }),
     prisma.clickLog.create({
-      data: { offerId: params.id, sessionId, userAgent },
+      data: { offerId: id, sessionId, userAgent },
     }),
   ])
 
