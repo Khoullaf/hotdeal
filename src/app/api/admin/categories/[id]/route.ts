@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { isAuthenticated } from '@/lib/auth'
+import { Prisma } from '@prisma/client'
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAuthenticated())) {
@@ -25,11 +26,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'Ce slug est déjà utilisé' }, { status: 409 })
   }
 
-  const category = await prisma.category.update({
-    where: { id },
-    data: { name: name.trim(), slug: slug.trim(), icon: icon || null, color: color || null },
-  })
-  return NextResponse.json(category)
+  try {
+    const category = await prisma.category.update({
+      where: { id },
+      data: { name: name.trim(), slug: slug.trim(), icon: icon || null, color: color || null },
+    })
+    return NextResponse.json(category)
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+      return NextResponse.json({ error: 'Catégorie introuvable' }, { status: 404 })
+    }
+    throw e
+  }
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -41,6 +49,13 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
   if (count > 0) {
     return NextResponse.json({ error: `Impossible de supprimer : ${count} offre(s) liée(s) à cette catégorie` }, { status: 409 })
   }
-  await prisma.category.delete({ where: { id } })
-  return NextResponse.json({ ok: true })
+  try {
+    await prisma.category.delete({ where: { id } })
+    return NextResponse.json({ ok: true })
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+      return NextResponse.json({ error: 'Catégorie introuvable' }, { status: 404 })
+    }
+    throw e
+  }
 }

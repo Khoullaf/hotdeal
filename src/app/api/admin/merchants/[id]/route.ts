@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { isAuthenticated } from '@/lib/auth'
+import { Prisma } from '@prisma/client'
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!(await isAuthenticated())) {
@@ -25,17 +26,24 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: 'Ce slug est déjà utilisé' }, { status: 409 })
   }
 
-  const merchant = await prisma.merchant.update({
-    where: { id },
-    data: {
-      name: name.trim(),
-      slug: slug.trim(),
-      website: website || null,
-      affiliateUrl: affiliateUrl || null,
-      logo: logo || null,
-    },
-  })
-  return NextResponse.json(merchant)
+  try {
+    const merchant = await prisma.merchant.update({
+      where: { id },
+      data: {
+        name: name.trim(),
+        slug: slug.trim(),
+        website: website || null,
+        affiliateUrl: affiliateUrl || null,
+        logo: logo || null,
+      },
+    })
+    return NextResponse.json(merchant)
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+      return NextResponse.json({ error: 'Marchand introuvable' }, { status: 404 })
+    }
+    throw e
+  }
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -47,6 +55,13 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
   if (count > 0) {
     return NextResponse.json({ error: `Impossible de supprimer : ${count} offre(s) liée(s) à ce marchand` }, { status: 409 })
   }
-  await prisma.merchant.delete({ where: { id } })
-  return NextResponse.json({ ok: true })
+  try {
+    await prisma.merchant.delete({ where: { id } })
+    return NextResponse.json({ ok: true })
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+      return NextResponse.json({ error: 'Marchand introuvable' }, { status: 404 })
+    }
+    throw e
+  }
 }
