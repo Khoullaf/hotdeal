@@ -1,6 +1,6 @@
 # 🔥 HotDeal - Site dénicheur de bons plans
 
-Site de bons plans français permettant de trouver les meilleures promotions sur le web. Construit avec Next.js 14, TypeScript, Tailwind CSS et Prisma/SQLite.
+Site de bons plans français permettant de trouver les meilleures promotions sur le web. Construit avec Next.js 15, TypeScript, Tailwind CSS et Prisma/SQLite.
 
 ## Fonctionnalités
 
@@ -15,7 +15,7 @@ Site de bons plans français permettant de trouver les meilleures promotions sur
 
 ## Tech Stack
 
-- **Next.js 14** (App Router)
+- **Next.js 15** (App Router)
 - **TypeScript**
 - **Tailwind CSS** (dark mode)
 - **Prisma** avec SQLite
