@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🔥 HotDeal - Site dénicheur de bons plans
 
-## Getting Started
+Site de bons plans français permettant de trouver les meilleures promotions sur le web. Construit avec Next.js 14, TypeScript, Tailwind CSS et Prisma/SQLite.
 
-First, run the development server:
+## Fonctionnalités
+
+- 🛍️ Catalogue d'offres avec recherche, filtres et tri
+- 📂 Navigation par catégories (High-Tech, Mode, Maison, Alimentation, Voyages)
+- 🏪 Pages marchands (Amazon, Cdiscount, Fnac, Darty, La Redoute)
+- ❤️ Favoris persistants (localStorage)
+- ⏱️ Minuterie d'expiration des offres
+- 🌙 Mode sombre
+- 📊 Dashboard d'administration
+- 💰 Intégration liens d'affiliation avec tracking des clics
+
+## Tech Stack
+
+- **Next.js 14** (App Router)
+- **TypeScript**
+- **Tailwind CSS** (dark mode)
+- **Prisma** avec SQLite
+- **lucide-react** pour les icônes
+
+## Installation
+
+```bash
+npm install
+```
+
+## Configuration base de données
+
+```bash
+# Créer/mettre à jour le schéma
+npx prisma db push
+
+# Alimenter la base avec les données de démonstration (22 offres)
+npm run seed
+```
+
+## Développement
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Ouvrir [http://localhost:3000](http://localhost:3000) dans le navigateur.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build de production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Pages disponibles
 
-To learn more about Next.js, take a look at the following resources:
+| Page | Description |
+|------|-------------|
+| `/` | Accueil avec offres vedettes et catégories |
+| `/offres` | Liste complète avec filtres |
+| `/offres/[id]` | Détail d'une offre |
+| `/categories` | Toutes les catégories |
+| `/categories/[slug]` | Offres par catégorie |
+| `/marchands` | Tous les marchands |
+| `/marchands/[slug]` | Offres par marchand |
+| `/favoris` | Mes offres favorites |
+| `/admin` | Tableau de bord admin |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Variables d'environnement
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Fichier `.env` :
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```env
+DATABASE_URL="file:./dev.db"
+NEXT_PUBLIC_SITE_NAME="HotDeal - Bons Plans"
+NEXT_PUBLIC_SITE_URL="http://localhost:3000"
+```
