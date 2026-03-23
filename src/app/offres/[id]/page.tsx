@@ -33,6 +33,11 @@ export default async function OfferDetailPage({ params }: PageProps) {
 
   if (!offer) notFound()
 
+  // Increment view counter (fire-and-forget, do not block render)
+  prisma.offer.update({ where: { id }, data: { views: { increment: 1 } } }).catch((e) => {
+    console.error('[views] Failed to increment views for offer', id, e)
+  })
+
   const relatedOffers = await prisma.offer.findMany({
     where: {
       categoryId: offer.categoryId,

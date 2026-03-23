@@ -1,5 +1,6 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { Suspense, useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import SearchBar from '@/components/SearchBar'
 import FilterBar from '@/components/FilterBar'
 import OfferGrid from '@/components/OfferGrid'
@@ -30,16 +31,34 @@ interface Offer {
 }
 
 export default function OffresPage() {
+  return (
+    <Suspense fallback={
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white dark:bg-gray-800 rounded-xl h-64 animate-pulse" />
+          ))}
+        </div>
+      </div>
+    }>
+      <OffresContent />
+    </Suspense>
+  )
+}
+
+function OffresContent() {
+  const searchParams = useSearchParams()
   const [offers, setOffers] = useState<Offer[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [search, setSearch] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('')
+  const [search, setSearch] = useState(() => searchParams.get('search') || '')
+  const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get('category') || '')
   const [selectedDiscount, setSelectedDiscount] = useState(0)
   const [maxPrice, setMaxPrice] = useState(2000)
   const [sort, setSort] = useState('newest')
+  const [featuredOnly, setFeaturedOnly] = useState(() => searchParams.get('featured') === 'true')
   const [loading, setLoading] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
 
@@ -54,6 +73,7 @@ export default function OffresPage() {
     if (selectedCategory) params.set('category', selectedCategory)
     if (selectedDiscount > 0) params.set('minDiscount', String(selectedDiscount))
     if (maxPrice < 2000) params.set('maxPrice', String(maxPrice))
+    if (featuredOnly) params.set('featured', 'true')
     params.set('sort', sort)
     params.set('page', String(page))
 
@@ -63,7 +83,7 @@ export default function OffresPage() {
     setTotal(data.total)
     setTotalPages(data.totalPages)
     setLoading(false)
-  }, [search, selectedCategory, selectedDiscount, maxPrice, sort, page])
+  }, [search, selectedCategory, selectedDiscount, maxPrice, sort, featuredOnly, page])
 
   useEffect(() => {
     fetchOffers()
@@ -74,19 +94,33 @@ export default function OffresPage() {
     setPage(1)
   }
 
+  const pageTitle = featuredOnly
+    ? '⭐ Coups de cœur'
+    : `Toutes les offres`
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Toutes les offres <span className="text-gray-500 font-normal text-lg">({total})</span>
+          {pageTitle} <span className="text-gray-500 font-normal text-lg">({total})</span>
         </h1>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="md:hidden flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-3 py-2 rounded-lg text-sm"
-        >
-          <SlidersHorizontal size={16} />
-          Filtres
-        </button>
+        <div className="flex items-center gap-2">
+          {featuredOnly && (
+            <button
+              onClick={() => { setFeaturedOnly(false); setPage(1) }}
+              className="text-xs text-orange-500 hover:text-orange-600 underline"
+            >
+              Voir tout
+            </button>
+          )}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="md:hidden flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 px-3 py-2 rounded-lg text-sm"
+          >
+            <SlidersHorizontal size={16} />
+            Filtres
+          </button>
+        </div>
       </div>
 
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
@@ -99,6 +133,8 @@ export default function OffresPage() {
           <option value="newest">Plus récents</option>
           <option value="popular">Plus populaires</option>
           <option value="discount">Meilleures réductions</option>
+          <option value="price-asc">Prix croissant</option>
+          <option value="price-desc">Prix décroissant</option>
         </select>
       </div>
 

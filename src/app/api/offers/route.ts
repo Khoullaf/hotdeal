@@ -10,10 +10,14 @@ export async function GET(request: NextRequest) {
   const sort = searchParams.get('sort') || 'newest'
   const maxPrice = searchParams.get('maxPrice')
   const minDiscount = searchParams.get('minDiscount')
+  const featured = searchParams.get('featured')
   const perPage = 10
 
   const where: Record<string, unknown> = { isActive: true }
 
+  if (featured === 'true') {
+    where.isFeatured = true
+  }
   if (category) {
     where.category = { slug: category }
   }
@@ -36,6 +40,8 @@ export async function GET(request: NextRequest) {
   const orderBy: Record<string, string> =
     sort === 'popular' ? { clicks: 'desc' } :
     sort === 'discount' ? { discount: 'desc' } :
+    sort === 'price-asc' ? { discountPrice: 'asc' } :
+    sort === 'price-desc' ? { discountPrice: 'desc' } :
     { createdAt: 'desc' }
 
   const [offers, total] = await Promise.all([
