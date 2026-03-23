@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  icon        String?
+  color       String?
+  offers      Offer[]
+  createdAt   DateTime @default(now())
+}
+
+model Merchant {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  logo         String?
+  website      String?
+  affiliateUrl String?
+  offers       Offer[]
+  createdAt    DateTime @default(now())
+}
+
+model Offer {
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  originalPrice Float?
+  discountPrice Float
+  discount      Int?
+  imageUrl      String?
+  affiliateUrl  String
+  sourceUrl     String?
+  categoryId    String
+  merchantId    String
+  category      Category @relation(fields: [categoryId], references: [id])
+  merchant      Merchant @relation(fields: [merchantId], references: [id])
+  expiresAt     DateTime?
+  isActive      Boolean  @default(true)
+  isFeatured    Boolean  @default(false)
+  clicks        Int      @default(0)
+  views         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  favorites     Favorite[]
+  clickLogs     ClickLog[]
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  offerId   String
+  offer     Offer    @relation(fields: [offerId], references: [id])
+  sessionId String
+  createdAt DateTime @default(now())
+  @@unique([offerId, sessionId])
+}
+
+model ClickLog {
+  id        String   @id @default(cuid())
+  offerId   String
+  offer     Offer    @relation(fields: [offerId], references: [id])
+  sessionId String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
