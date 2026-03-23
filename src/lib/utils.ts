@@ -15,7 +15,9 @@ export function generateSessionId(): string {
   if (typeof window === 'undefined') return ''
   let sessionId = localStorage.getItem('hotdeal_session_id')
   if (!sessionId) {
-    sessionId = Math.random().toString(36).substring(2) + Date.now().toString(36)
+    sessionId = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : Date.now().toString(36) + Math.random().toString(36).substring(2)
     localStorage.setItem('hotdeal_session_id', sessionId)
   }
   return sessionId

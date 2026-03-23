@@ -9,6 +9,11 @@ export async function POST(
   const sessionId = body.sessionId || null
   const userAgent = request.headers.get('user-agent') || null
 
+  const offer = await prisma.offer.findUnique({ where: { id: params.id }, select: { id: true } })
+  if (!offer) {
+    return NextResponse.json({ error: 'Offer not found' }, { status: 404 })
+  }
+
   await Promise.all([
     prisma.offer.update({
       where: { id: params.id },

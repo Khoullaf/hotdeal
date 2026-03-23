@@ -25,6 +25,8 @@ interface OfferCardProps {
   offer: Offer
 }
 
+const EXPIRING_SOON_THRESHOLD_MS = 2 * 24 * 60 * 60 * 1000
+
 export default function OfferCard({ offer }: OfferCardProps) {
   const [isFavorite, setIsFavorite] = useState(false)
 
@@ -51,7 +53,7 @@ export default function OfferCard({ offer }: OfferCardProps) {
   }
 
   const isExpiringSoon = offer.expiresAt
-    ? new Date(offer.expiresAt).getTime() - Date.now() < 2 * 24 * 60 * 60 * 1000
+    ? new Date(offer.expiresAt).getTime() - Date.now() < EXPIRING_SOON_THRESHOLD_MS
     : false
 
   return (

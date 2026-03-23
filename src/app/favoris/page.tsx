@@ -28,7 +28,7 @@ export default function FavorisPage() {
       setLoading(false)
       return
     }
-    fetch(`/api/favorites?offerIds=${favoriteIds.join(',')}`)
+    fetch(`/api/favorites?offerIds=${favoriteIds.map(encodeURIComponent).join(',')}`)
       .then(r => r.json())
       .then(data => {
         setOffers(data)
