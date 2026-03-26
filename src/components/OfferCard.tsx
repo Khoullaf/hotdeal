@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Heart } from 'lucide-react'
 import Badge from './Badge'
 import ExpiryTimer from './ExpiryTimer'
@@ -60,8 +61,7 @@ export default function OfferCard({ offer }: OfferCardProps) {
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 dark:border-gray-700 overflow-hidden flex flex-col">
       <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
         {offer.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={offer.imageUrl} alt={offer.title} className="w-full h-full object-cover" />
+          <Image src={offer.imageUrl} alt={offer.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
         ) : (
           <span className="text-6xl">{offer.category.icon || '🛍️'}</span>
         )}

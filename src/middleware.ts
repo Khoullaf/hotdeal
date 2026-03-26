@@ -1,5 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+function timingSafeEqual(a: string, b: string): boolean {
+  const encoder = new TextEncoder()
+  const aBytes = encoder.encode(a)
+  const bBytes = encoder.encode(b)
+  // Use constant-time comparison over the longer length to avoid timing leaks
+  const len = Math.max(aBytes.length, bBytes.length)
+  let diff = aBytes.length ^ bBytes.length
+  for (let i = 0; i < len; i++) {
+    diff |= (aBytes[i] ?? 0) ^ (bBytes[i] ?? 0)
+  }
+  return diff === 0
+}
+
 export function middleware(request: NextRequest) {
   const adminPassword = process.env.ADMIN_PASSWORD
 
@@ -25,7 +38,7 @@ export function middleware(request: NextRequest) {
   const colonIndex = credentials.indexOf(':')
   const password = colonIndex !== -1 ? credentials.slice(colonIndex + 1) : ''
 
-  if (password !== adminPassword) {
+  if (!timingSafeEqual(password, adminPassword)) {
     return new NextResponse('Invalid credentials', {
       status: 401,
       headers: {

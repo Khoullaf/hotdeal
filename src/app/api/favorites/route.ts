@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+const MAX_OFFER_IDS = 50
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const sessionId = searchParams.get('sessionId')
   const offerIds = searchParams.get('offerIds')
 
   if (offerIds) {
-    const ids = offerIds.split(',').filter(Boolean)
+    const ids = offerIds.split(',').filter(Boolean).slice(0, MAX_OFFER_IDS)
     const offers = await prisma.offer.findMany({
       where: { id: { in: ids }, isActive: true },
       include: { merchant: true, category: true },
@@ -34,7 +36,19 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { offerId, sessionId } = await request.json()
+  const body = await request.json().catch(() => null)
+  if (!body) {
+    return NextResponse.json({ error: 'Corps de requête invalide' }, { status: 400 })
+  }
+
+  const { offerId, sessionId } = body as Record<string, unknown>
+
+  if (typeof offerId !== 'string' || !offerId.trim()) {
+    return NextResponse.json({ error: 'offerId invalide' }, { status: 400 })
+  }
+  if (typeof sessionId !== 'string' || !sessionId.trim()) {
+    return NextResponse.json({ error: 'sessionId invalide' }, { status: 400 })
+  }
 
   const existing = await prisma.favorite.findUnique({
     where: { offerId_sessionId: { offerId, sessionId } },
