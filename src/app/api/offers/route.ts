@@ -6,7 +6,8 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get('category')
   const merchant = searchParams.get('merchant')
   const search = searchParams.get('search')
-  const page = parseInt(searchParams.get('page') || '1')
+  const rawPage = parseInt(searchParams.get('page') || '1')
+  const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1
   const sort = searchParams.get('sort') || 'newest'
   const maxPrice = searchParams.get('maxPrice')
   const minDiscount = searchParams.get('minDiscount')
